@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import MicroService
+from .models import MicroService, MicroServiceConfiguration
 
 
 class MicroServiceSerializer(serializers.ModelSerializer):
@@ -38,3 +38,10 @@ class MicroServiceSerializer(serializers.ModelSerializer):
             return (True, True, True)
         else:
             return (True, True, False)
+
+
+class MicroServiceConfigurationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MicroServiceConfiguration
+        fields = [field.name for field in
+                  MicroServiceConfiguration._meta.fields]

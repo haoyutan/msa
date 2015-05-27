@@ -17,5 +17,3 @@ class MicroServiceConfigurationAdmin(admin.ModelAdmin):
     ordering = ('id',)
 
 admin.site.register(MicroServiceConfiguration, MicroServiceConfigurationAdmin)
-
-
