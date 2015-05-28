@@ -107,7 +107,73 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 
+# Settings for rest framwork
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': ('msa_framework.permissions.DenyAny',),
     'DEFAULT_AUTHENTICATION_CLASSES': (),
+}
+
+
+# Master server name
+MSA_MASTER_SERVER_NAME = os.environ.get('MSA_MASTER_SERVER_NAME', 'the-master')
+
+
+# Settings for logging
+os.makedirs(os.path.join(BASE_DIR, 'logs'), exist_ok=True)
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(asctime)s.%(msecs)03d|%(levelname)s|%(name)s|%(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S',
+        },
+    },
+    'handlers': {
+        'files-django': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs/django.log'),
+            'maxBytes': 1073844224,
+            'backupCount': 10,
+            'encoding': 'UTF-8',
+            'formatter': 'verbose',
+        },
+        'files-app': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs/app.log'),
+            'maxBytes': 1073844224,
+            'backupCount': 3,
+            'encoding': 'UTF-8',
+            'formatter': 'verbose',
+        },
+        'files-api': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs/api.log'),
+            'maxBytes': 1073844224,
+            'backupCount': 10,
+            'encoding': 'UTF-8',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        '': {
+            'handlers': ['files-app'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'API': {
+            'handlers': ['files-api'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'django': {
+            'handlers': ['files-django'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
 }

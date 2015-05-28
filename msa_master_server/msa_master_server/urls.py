@@ -15,8 +15,24 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
+from django.conf import settings
+
+from rest_framework.urlpatterns import format_suffix_patterns
+
+from . import views
+
+
+home_urlpatterns = [
+    url(r'^$', views.master_server_info),
+]
+
+home_urlpatterns = format_suffix_patterns(home_urlpatterns)
+
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^', include('micro_services.urls')),
+    url(r'^{}/'.format(settings.MSA_MASTER_SERVER_NAME),
+        include('micro_services.urls')),
 ]
+
+urlpatterns = urlpatterns + home_urlpatterns
