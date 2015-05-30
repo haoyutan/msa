@@ -46,10 +46,11 @@ class MicroServiceList(LoggedAPIView):
 
     def get(self, request, format=None):
         micro_services = self.model_class.objects.all()
-        result = []
+        result = {}
         for micro_service in micro_services:
             serializer = self.serializer_class(micro_service)
-            result.append(serializer.safe_data(request.user))
+            data = serializer.safe_data(request.user)
+            result[data['name']] = data
         return Response(result)
 
 micro_service_list = MicroServiceList.as_view()

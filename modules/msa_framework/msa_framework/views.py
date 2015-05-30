@@ -1,13 +1,15 @@
 import logging, json
 from uuid import uuid1
+from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny
 
 
 class LoggedAPIView(APIView):
     logger = logging.getLogger('API')
 
     def __init__(self, *args, **kwargs):
-        super(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._log_id = str(uuid1())
 
     def initial(self, request, *args, **kwargs):
@@ -50,3 +52,13 @@ class LoggedAPIView(APIView):
         info_str = json.dumps(info, sort_keys = True)
         msg = '{}|{}|{}'.format(self._log_id, 'RESPONSE', info_str)
         self.logger.info(msg)
+
+
+class MessageView(LoggedAPIView):
+    permission_classes = (AllowAny,)
+    message = 'NA'
+
+    def get(self, request, format=None):
+        return Response({'message': self.message})
+
+welcome_message_view = MessageView.as_view(message = 'Welcome!')

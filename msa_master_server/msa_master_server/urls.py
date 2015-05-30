@@ -19,20 +19,13 @@ from django.conf import settings
 
 from rest_framework.urlpatterns import format_suffix_patterns
 
-from . import views
+from msa_framework import views
 
 
-home_urlpatterns = [
-    url(r'^$', views.master_server_info),
-]
-
-home_urlpatterns = format_suffix_patterns(home_urlpatterns)
-
+MMSN = settings.MSA_MASTER_SERVER_NAME
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^{}/'.format(settings.MSA_MASTER_SERVER_NAME),
-        include('micro_services.urls')),
+    url(r'^$', views.MessageView.as_view(message = MMSN)),
+    url(r'^{}/'.format(MMSN), include('micro_services.urls')),
 ]
-
-urlpatterns = urlpatterns + home_urlpatterns
