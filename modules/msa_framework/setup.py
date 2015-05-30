@@ -10,7 +10,7 @@ setup(
     license='MIT',
     description='Micro Service Architecture Framework',
     url='http://www.deepera.com/',
-    long_description=open('README').read(),
+    long_description=open('README.md').read(),
     platforms=['Any',],
 
     install_requires=('django', 'djangorestframework',),
