@@ -26,12 +26,12 @@ def get_msa_settings(DATA_DIR='/data',
         'DEFAULT_AUTHENTICATION_CLASSES': (),
     }
 
-    # HTTPS settings
+    # Add settings for HTTPS
     settings['SECURE_PROXY_SSL_HEADER'] = ('HTTP_X_FORWARDED_PROTO', 'https')
     settings['SESSION_COOKIE_SECURE'] = SECURE_COOKIE
     settings['CSRF_COOKIE_SECURE'] = SECURE_COOKIE
 
-    # Settings for logging
+    # Add settings for logging
     settings['LOGGING'] = {
         'version': 1,
         'disable_existing_loggers': False,
@@ -89,6 +89,11 @@ def get_msa_settings(DATA_DIR='/data',
         },
     }
 
+    # Update settings for static files
+    settings['STATIC_URL'] = '/django-static/'
+    settings['STATIC_ROOT'] = '/tmp/data/web/django-static/'
+
+    # Update settings for databases
     if USE_MSA_DEFAULT_DATABASES:
         settings['DATABASES'] = {
             'default': {
