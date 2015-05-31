@@ -62,10 +62,10 @@ elif [ "$1" = "shell" ]; then
 		--volumes-from $DATA_CONTAINER_NAME \
 		$DATA_IMAGE_NAME \
 		exec /bin/bash
-	sudo docker rm $TMP_CONTAINER_NAME
+	sudo docker rm -v $TMP_CONTAINER_NAME
 
 elif [ "$1" = "clean-docker" ]; then
-	sudo docker rm -f -v $TMP_CONTAINER_NAME
+	sudo docker rm -v -f $TMP_CONTAINER_NAME
 
 else
 	echo "Usage: $0 start|copy|backup|clean|exec|shell|clean-docker"
