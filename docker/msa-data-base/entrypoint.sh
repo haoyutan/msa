@@ -30,9 +30,13 @@ elif [ "$1" = "exec" ]; then
 	shift
 	echo "Exec $@."
 	$EXEC_AS_MSA $@
+elif [ "$1" = "sudo" ]; then
+	shift
+	echo "Sudo $@."
+	exec $@
 else
 	echo "ERROR: Cannot recognize task $@."
-	echo "Usage: entrypoint.sh start|copy|backup|clean|exec"
+	echo "Usage: entrypoint.sh start|copy|backup|clean|exec|sudo"
 	exit 1
 fi
 

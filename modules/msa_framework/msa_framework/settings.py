@@ -91,7 +91,7 @@ def get_msa_settings(DATA_DIR='/data',
 
     # Update settings for static files
     settings['STATIC_URL'] = '/django-static/'
-    settings['STATIC_ROOT'] = '/tmp/data/web/django-static/'
+    settings['STATIC_ROOT'] = os.path.join(DATA_DIR, 'web/django-static/')
 
     # Update settings for databases
     if USE_MSA_DEFAULT_DATABASES:

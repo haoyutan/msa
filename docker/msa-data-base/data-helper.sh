@@ -9,7 +9,7 @@ if [ "$1" = "start" ]; then
 	sudo docker run -d --name $DATA_CONTAINER_NAME $DATA_IMAGE_NAME start
 	exit 0
 
-elif [ "$1" = "copy" ]; then
+elif [ "$1" = "upload" ]; then
 	SRC_PATH=$2
 	if [[ "$SRC_PATH" != /* ]]; then
 		SRC_PATH=`pwd`/$SRC_PATH
@@ -57,18 +57,19 @@ elif [ "$1" = "exec" ]; then
 		exec $@
 	sudo docker rm -v $TMP_CONTAINER_NAME
 
-elif [ "$1" = "shell" ]; then
+elif [ "$1" = "sudo" ]; then
+	shift
 	sudo docker run -it --name $TMP_CONTAINER_NAME \
 		--volumes-from $DATA_CONTAINER_NAME \
 		$DATA_IMAGE_NAME \
-		exec /bin/bash
+		sudo $@
 	sudo docker rm -v $TMP_CONTAINER_NAME
 
 elif [ "$1" = "clean-docker" ]; then
 	sudo docker rm -v -f $TMP_CONTAINER_NAME
 
 else
-	echo "Usage: $0 start|copy|backup|clean|exec|shell|clean-docker"
+	echo "Usage: $0 start|upload|backup|clean|exec|sudo|clean-docker"
 	exit 1
 fi
 
