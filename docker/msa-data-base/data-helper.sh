@@ -21,7 +21,7 @@ elif [ "$1" = "copy" ]; then
 		-v $SRC_PATH:$MOUNT_POINT \
 		$DATA_IMAGE_NAME \
 		copy $MOUNT_POINT
-	sudo docker rm $TMP_CONTAINER_NAME
+	sudo docker rm -v $TMP_CONTAINER_NAME
 
 elif [ "$1" = "backup" ]; then
 	DEST_PATH=$2
@@ -40,14 +40,14 @@ elif [ "$1" = "backup" ]; then
 		-v $DEST_PATH:$MOUNT_POINT \
 		$DATA_IMAGE_NAME \
 		backup
-	sudo docker rm $TMP_CONTAINER_NAME
+	sudo docker rm -v $TMP_CONTAINER_NAME
 
 elif [ "$1" = "clean" ]; then
 	sudo docker run -it --name $TMP_CONTAINER_NAME \
 		--volumes-from $DATA_CONTAINER_NAME \
 		$DATA_IMAGE_NAME \
 		clean
-	sudo docker rm $TMP_CONTAINER_NAME
+	sudo docker rm -v $TMP_CONTAINER_NAME
 
 elif [ "$1" = "exec" ]; then
 	shift
@@ -55,7 +55,7 @@ elif [ "$1" = "exec" ]; then
 		--volumes-from $DATA_CONTAINER_NAME \
 		$DATA_IMAGE_NAME \
 		exec $@
-	sudo docker rm $TMP_CONTAINER_NAME
+	sudo docker rm -v $TMP_CONTAINER_NAME
 
 elif [ "$1" = "shell" ]; then
 	sudo docker run -it --name $TMP_CONTAINER_NAME \
@@ -65,7 +65,7 @@ elif [ "$1" = "shell" ]; then
 	sudo docker rm $TMP_CONTAINER_NAME
 
 elif [ "$1" = "clean-docker" ]; then
-	sudo docker rm -f $TMP_CONTAINER_NAME
+	sudo docker rm -f -v $TMP_CONTAINER_NAME
 
 else
 	echo "Usage: $0 start|copy|backup|clean|exec|shell|clean-docker"
