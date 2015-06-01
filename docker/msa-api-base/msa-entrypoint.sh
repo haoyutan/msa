@@ -56,9 +56,9 @@ install_python_packages () {
 	fi
 
 	echo "Installing Python packages..."
-	for PACKAGE in `ls $MSA_DIST/packages/`; do
+	for PACKAGE in `ls $MSA_DIST/packages/*.whl $MSA_DIST/packages/*.tar.gz`; do
 		echo "Installing $PACKAGE..."
-		$PIP install $MSA_DIST/packages/$PACKAGE
+		$PIP install $PACKAGE
 	done
 }
 

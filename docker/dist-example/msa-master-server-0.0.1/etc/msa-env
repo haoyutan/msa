@@ -1,0 +1,6 @@
+#!/bin/sh
+
+export MSA_APP_NAME=msa_master_server
+export MSA_DEPLOY_ENVIRONMENT=production
+export MSA_DEBUG=True
+export MSA_MASTER_SERVER_NAME=zero
