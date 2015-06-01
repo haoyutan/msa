@@ -24,6 +24,10 @@ ENV LANG en_US.utf8
 RUN apt-get update && apt-get install -y tar openssl nginx
 RUN apt-get update && apt-get install -y python3.4 python3.4-venv python3-pip
 
+# config for nginx directory permissions
+RUN mkdir -p /var/log/nginx
+RUN chown msa:msa /var/log/nginx
+
 COPY entrypoint.sh /entrypoint.sh
 COPY msa-entrypoint.sh /msa-entrypoint.sh
 

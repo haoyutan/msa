@@ -120,10 +120,13 @@ start_server () {
 
 	source_msa_env
 	enter_pyvenv
+
+	echo "Starting gunicorn..."
 	cd $MSA_DEPLOY/$MSA_APP_NAME && \
 		gunicorn -b unix:/tmp/gunicorn.sock \
         		${MSA_APP_NAME}.wsgi:application &
 
+	echo "Starting nginx..."
 	mkdir -p $MSA_DATA/log/nginx
 	exec nginx -c $MSA_DEPLOY/etc/nginx/nginx.conf
 }
