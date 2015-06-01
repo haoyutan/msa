@@ -56,8 +56,14 @@ install_python_packages () {
 	fi
 
 	echo "Installing Python packages..."
+	if [ -f "$MSA_DIST/packages/packages.list" ]; then
+		echo "Found $MSA_DIST/packages/packages.list. Will install the following packages:"
+		cat $MSA_DIST/packages/packages.list
+		$PIP install -r $MSA_DIST/packages/packages.list
+	fi
+
 	for PACKAGE in `ls $MSA_DIST/packages/*.whl $MSA_DIST/packages/*.tar.gz`; do
-		echo "Installing $PACKAGE..."
+		echo "Installing additional packages: $PACKAGE..."
 		$PIP install $PACKAGE
 	done
 }
