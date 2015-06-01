@@ -109,7 +109,8 @@ STATIC_URL = '/static/'
 
 
 # MSA-Framework settings 
-from msa_framework.settings import get_msa_settings_development
-locals().update(get_msa_settings_development(BASE_DIR))
+from msa_framework.settings import get_msa_settings_from_env
+locals().update(get_msa_settings_from_env(BASE_DIR))
 
-MSA_MASTER_SERVER_NAME = 'hello-master'
+MSA_MASTER_SERVER_NAME = os.environ.get('MSA_MASTER_SERVER_NAME',
+                                        'hello-master')
