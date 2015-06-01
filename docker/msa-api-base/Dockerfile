@@ -27,5 +27,7 @@ RUN apt-get update && apt-get install -y python3.4 python3.4-venv python3-pip
 COPY entrypoint.sh /entrypoint.sh
 COPY msa-entrypoint.sh /msa-entrypoint.sh
 
+EXPOSE 8443
+
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["start"]

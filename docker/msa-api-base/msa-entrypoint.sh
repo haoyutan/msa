@@ -2,7 +2,7 @@
 set -e
 
 PYTHON_VERSION=3.4
-PYTHON=python-$PYTHON_VERSION
+PYTHON=python$PYTHON_VERSION
 PYVENV=pyvenv-$PYTHON_VERSION
 PIP=pip3
 
@@ -11,14 +11,33 @@ MSA_TMP=/data/.msa-tmp
 MSA_DIST=$MSA_DATA/dist
 MSA_DEPLOY=$MSA_DATA/deploy
 
-# get application name
-if [ ! -f "$MSA_DIST/.meta" ]; then
-	echo "ERROR: $MSA_DIST/.meta does not exist."
-	exit 1
-fi
-MSA_APP_NAME=`cat $MSA_DIST/.meta`
+install_etc () {
+	echo "Installing etc..."
+	if [ ! -d "$MSA_DIST/etc" ]; then
+		echo "ERROR: $MSA_DIST/etc does not exist."
+		exit 1
+	fi
 
-setup_pyvenv () {
+	if [ -d "$MSA_DEPLOY/etc" ]; then
+		echo "WARNING: $MSA_DEPLOY/etc already exists. Skip installing etc."
+	fi
+	cp -r $MSA_DIST/etc $MSA_DEPLOY/
+}
+
+source_msa_env () {
+	if [ ! -f $MSA_DEPLOY/etc/msa-env ]; then
+		echo "ERROR: $MSA_DEPLOY/etc/msa-env does not exist."
+		exit 1
+	fi
+	. $MSA_DEPLOY/etc/msa-env
+
+	if [ -z "$MSA_APP_NAME" ]; then
+		echo "ERROR: MSA_APP_NAME must be set to a non-empty value in $MSA_DEPLOY/etc/msa-env."
+		exit 1
+	fi
+}
+
+create_pyvenv () {
 	echo "Creating Python venv in $MSA_DEPLOY/env..."
 	$PYVENV $MSA_DEPLOY/env
 }
@@ -41,9 +60,9 @@ install_python_packages () {
 	done
 }
 
-copy_web_application () {
+copy_application () {
 	if [ -d "$MSA_DEPLOY/$MSA_APP_NAME" ]; then
-		echo "WARNING: $MSA_DEPLOY/$MSA_APP_NAME already exists. Skip copying web application from $MSA_DIST/$MSA_APP_NAME.tar.gz"
+		echo "WARNING: $MSA_DEPLOY/$MSA_APP_NAME already exists. Skip copying application from $MSA_DIST/$MSA_APP_NAME.tar.gz"
 		return 0
 	fi
 
@@ -53,12 +72,32 @@ copy_web_application () {
 	mv $MSA_TMP/$MSA_APP_NAME $MSA_DEPLOY
 }
 
+init_application () {
+	if [ ! -e "$MSA_DEPLOY/django-static" ]; then
+		echo "Generating static files for the django application..."
+		cd $MSA_DEPLOY/$MSA_APP_NAME && $PYTHON manage.py collectstatic
+	fi
+
+	echo "Creating $MSA_DATA/db and $MSA_DATA/log..."
+	mkdir -p $MSA_DATA/db
+	mkdir -p $MSA_DATA/log
+
+	if [ -f "$MSA_DEPLOY/$MSA_APP_NAME/db.sqlite3" ] && \
+	    [ ! -e "$MSA_DATA/db/db.sqlite3" ]; then
+		echo "Copying $MSA_DEPLOY/$MSA_APP_NAME/db.sqlite3 to $MSA_DATA/db/db.sqlite3"
+		cp $MSA_DEPLOY/$MSA_APP_NAME/db.sqlite3 $MSA_DATA/db/
+	fi
+}
+
 setup () {
 	mkdir -p $MSA_DEPLOY
-	setup_pyvenv
+	install_etc
+	source_msa_env
+	create_pyvenv
 	enter_pyvenv
 	install_python_packages
-	copy_web_application
+	copy_application
+	init_application
 }
 
 if [ "$1" = "setup" ]; then
