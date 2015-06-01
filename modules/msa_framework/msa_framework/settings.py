@@ -7,7 +7,7 @@ def get_msa_settings(BASE_DIR,
                      SECURE_COOKIE=False,
                      USE_MSA_DEFAULT_DATABASES=True,
                      STATIC_URL='/django-static/',
-                     STATIC_ROOT_REL='deploy/web/django-static/'):
+                     STATIC_ROOT_REL='django-static/'):
     settings = {}
 
     LOG_DIR = os.path.join(DATA_DIR, 'log')
@@ -87,8 +87,7 @@ def get_msa_settings(BASE_DIR,
 
     # Update settings for static files
     settings['STATIC_URL'] = STATIC_URL
-    STATIC_ROOT = os.path.join(DATA_DIR, STATIC_ROOT_REL)
-    settings['STATIC_ROOT'] = STATIC_ROOT
+    settings['STATIC_ROOT'] = os.path.joing(DATA_DIR, STATIC_ROOT_REL)
     os.makedirs(STATIC_ROOT, exist_ok=True)
 
     # Update settings for databases
@@ -108,8 +107,10 @@ def get_msa_settings_from_env(BASE_DIR):
                                             'development')
     MSA_DEBUG = os.environ.get('MSA_DEBUG', True)
     if MSA_DEPLOY_ENVIRONMENT.lower() == 'production':
-        return get_msa_settings(BASE_DIR, DATA_DIR='/data', DEBUG=MSA_DEBUG,
-                                SECURE_COOKIE=True)
+        return get_msa_settings(
+            BASE_DIR, DATA_DIR='/data', DEBUG=MSA_DEBUG, SECURE_COOKIE=True,
+            STATIC_ROOT_REL='deploy/web/django-static/'
+        )
     elif MSA_DEPLOY_ENVIRONMENT.lower() == 'development':
         return get_msa_settings(BASE_DIR, DATA_DIR=BASE_DIR, DEBUG=MSA_DEBUG)
     else:

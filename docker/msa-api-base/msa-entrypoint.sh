@@ -25,11 +25,13 @@ install_etc () {
 }
 
 source_msa_env () {
+	echo "Loading $MSA_DEPLOY/etc/msa-env..."
 	if [ ! -f $MSA_DEPLOY/etc/msa-env ]; then
 		echo "ERROR: $MSA_DEPLOY/etc/msa-env does not exist."
 		exit 1
 	fi
 	. $MSA_DEPLOY/etc/msa-env
+	set | grep MSA_
 
 	if [ -z "$MSA_APP_NAME" ]; then
 		echo "ERROR: MSA_APP_NAME must be set to a non-empty value in $MSA_DEPLOY/etc/msa-env."
@@ -73,23 +75,30 @@ copy_application () {
 }
 
 init_application () {
-	if [ ! -e "$MSA_DEPLOY/django-static" ]; then
+	if [ ! -e "$MSA_DEPLOY/web/django-static" ]; then
 		echo "Generating static files for the django application..."
-		cd $MSA_DEPLOY/$MSA_APP_NAME && $PYTHON manage.py collectstatic
+		cd $MSA_DEPLOY/$MSA_APP_NAME && $PYTHON manage.py collectstatic --noinput
+	else
+		echo "WARNING: $MSA_DEPLOY/web/django-static/ already exists. Skip generating static files."
 	fi
 
 	echo "Creating $MSA_DATA/db and $MSA_DATA/log..."
 	mkdir -p $MSA_DATA/db
 	mkdir -p $MSA_DATA/log
 
-	if [ -f "$MSA_DEPLOY/$MSA_APP_NAME/db.sqlite3" ] && \
+	if [ -f "$MSA_DEPLOY/$MSA_APP_NAME/db/db.sqlite3" ] && \
 	    [ ! -e "$MSA_DATA/db/db.sqlite3" ]; then
-		echo "Copying $MSA_DEPLOY/$MSA_APP_NAME/db.sqlite3 to $MSA_DATA/db/db.sqlite3"
-		cp $MSA_DEPLOY/$MSA_APP_NAME/db.sqlite3 $MSA_DATA/db/
+		echo "Copying $MSA_DEPLOY/$MSA_APP_NAME/db/db.sqlite3 to $MSA_DATA/db/db.sqlite3"
+		cp $MSA_DEPLOY/$MSA_APP_NAME/db/db.sqlite3 $MSA_DATA/db/
 	fi
 }
 
-setup () {
+setup_server () {
+	if [ -e "$MSA_DEPLOY/.setup_success" ]; then
+		echo "WARNING: Previous setup has been done successfully. Skip setup."
+		exit 1
+	fi
+
 	mkdir -p $MSA_DEPLOY
 	install_etc
 	source_msa_env
@@ -98,14 +107,34 @@ setup () {
 	install_python_packages
 	copy_application
 	init_application
+
+	touch $MSA_DEPLOY/.setup_success
+	echo "Congratulations! Setup has been done successfully."
+}
+
+start_server () {
+	if [ ! -e "$MSA_DEPLOY/.setup_success" ]; then
+		echo "ERROR: Please setup the server first."
+		exit 1
+	fi
+
+	source_msa_env
+	enter_pyvenv
+	cd $MSA_DEPLOY/$MSA_APP_NAME && \
+		gunicorn -b unix:/tmp/gunicorn.sock \
+        		${MSA_APP_NAME}.wsgi:application &
+
+	mkdir -p $MSA_DATA/log/nginx
+	exec nginx -c $MSA_DEPLOY/etc/nginx/nginx.conf
 }
 
 if [ "$1" = "setup" ]; then
 	echo "Setup api server."
-	setup
+	setup_server
 	exec /bin/true
 elif [ "$1" = "start" ]; then
 	echo "Start api server."
+	start_server
 	exec /bin/true
 elif [ "$1" = "exec" ]; then
 	shift
@@ -113,7 +142,7 @@ elif [ "$1" = "exec" ]; then
 	exec $@
 else
 	echo "ERROR: Cannot recognize task $@."
-	echo "Usage: entrypoint.sh setup|exec"
+	echo "Usage: entrypoint.sh setup|start|exec"
 	exit 1
 fi
 

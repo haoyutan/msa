@@ -21,7 +21,7 @@ RUN apt-get update && apt-get install -y locales \
 ENV LANG en_US.utf8
 
 # install tools for data manipulation
-RUN apt-get update && apt-get install -y tar
+RUN apt-get update && apt-get install -y tar vim
 
 ENV MSA_DATA /data
 VOLUME /data
