@@ -87,7 +87,8 @@ def get_msa_settings(BASE_DIR,
 
     # Update settings for static files
     settings['STATIC_URL'] = STATIC_URL
-    settings['STATIC_ROOT'] = os.path.joing(DATA_DIR, STATIC_ROOT_REL)
+    STATIC_ROOT = os.path.join(DATA_DIR, STATIC_ROOT_REL)
+    settings['STATIC_ROOT'] = STATIC_ROOT
     os.makedirs(STATIC_ROOT, exist_ok=True)
 
     # Update settings for databases
