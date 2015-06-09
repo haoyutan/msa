@@ -1,7 +1,7 @@
 from django.http import Http404
 from rest_framework.response import Response
 
-from msa_framework.views import LoggedAPIView
+from msa.views import LoggedAPIView
 
 from .authentication import MicroServiceSecretAuthentication
 from .permissions import IsMicroService

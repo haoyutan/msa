@@ -18,7 +18,7 @@ def get_msa_settings(BASE_DIR,
 
     # Settings for rest framwork
     settings['REST_FRAMEWORK'] = {
-        'DEFAULT_PERMISSION_CLASSES': ('msa_framework.permissions.DenyAny',),
+        'DEFAULT_PERMISSION_CLASSES': ('msa.permissions.DenyAny',),
         'DEFAULT_AUTHENTICATION_CLASSES': (),
     }
 

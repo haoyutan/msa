@@ -1,6 +1,6 @@
 from django.db import models
 
-from msa_framework.utils import random_hex_string
+from msa.utils import random_hex_string
 
 
 class MicroService(models.Model):

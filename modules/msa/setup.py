@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='MSA-Framework',
-    version='0.0.1',
+    version='0.1',
     packages=find_packages(),
     author='Haoyu Tan',
     author_email='haoyutan@gmail.com',

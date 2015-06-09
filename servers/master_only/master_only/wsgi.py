@@ -1,5 +1,5 @@
 """
-WSGI config for msa_master_server project.
+WSGI config for master_only project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "msa_master_server.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "master_only.settings")
 
 application = get_wsgi_application()
