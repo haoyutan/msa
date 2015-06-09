@@ -1,119 +1,181 @@
 import os
 
 
-def get_msa_settings(BASE_DIR,
-                     DATA_DIR,
-                     DEBUG=True,
-                     SECURE_COOKIE=False,
-                     USE_MSA_DEFAULT_DATABASES=True,
-                     STATIC_URL='/django-static/',
-                     STATIC_ROOT_REL='django-static/'):
-    settings = {}
+MSA_CONFIG_DEFAULT = {
+    'DEBUG'               : True,
+    'MSA_DATA_DIR'        : None,
+    'STATIC_URL'          : '/django-static/',
+    'MSA_STATIC_ROOT'     : 'django-static/',
+    'MSA_HTTPS'           : False,
+    'MSA_DEFAULT_DB'      : True,
+    'MSA_LOGGING'         : True,
+    'MSA_ALLOW_ADMIN_SITE': False,
+}
 
-    LOG_DIR = os.path.join(DATA_DIR, 'log')
-    os.makedirs(LOG_DIR, exist_ok=True)
+MSA_CONFIG_DEVELOPMENT_DEFAULT = MSA_CONFIG_DEFAULT.copy()
+MSA_CONFIG_DEVELOPMENT_DEFAULT.update({
+    'MSA_ALLOW_ADMIN_SITE': True,
+})
 
-    DB_DIR = os.path.join(DATA_DIR, 'db')
-    os.makedirs(DB_DIR, exist_ok=True)
+MSA_CONFIG_DOCKER_DEFAULT = MSA_CONFIG_DEFAULT.copy()
+MSA_CONFIG_DOCKER_DEFAULT.update({
+    'DEBUG'               : False,
+    'MSA_DATA_DIR'        : '/data',
+    'MSA_HTTPS'           : True ,
+    'MSA_STATIC_ROOT'     : 'deploy/web/django-static/',
+    'MSA_ALLOW_ADMIN_SITE': True,
+})
 
-    # Settings for rest framwork
-    settings['REST_FRAMEWORK'] = {
-        'DEFAULT_PERMISSION_CLASSES': ('msa.permissions.DenyAny',),
-        'DEFAULT_AUTHENTICATION_CLASSES': (),
-    }
 
-    # Add settings for HTTPS
-    settings['SECURE_PROXY_SSL_HEADER'] = ('HTTP_X_FORWARDED_PROTO', 'https')
-    settings['SESSION_COOKIE_SECURE'] = SECURE_COOKIE
-    settings['CSRF_COOKIE_SECURE'] = SECURE_COOKIE
+class MSASettings:
 
-    # Add settings for logging
-    settings['LOGGING'] = {
-        'version': 1,
-        'disable_existing_loggers': False,
-        'formatters': {
-            'verbose': {
-                'format': '%(asctime)s.%(msecs)03d|%(levelname)s|%(name)s|%(message)s',
-                'datefmt': '%Y-%m-%d %H:%M:%S',
-            },
-        },
-        'handlers': {
-            'files-django': {
-                'level': 'DEBUG',
-                'class': 'logging.handlers.RotatingFileHandler',
-                'filename': os.path.join(LOG_DIR, 'django.log'),
-                'maxBytes': 1073844224,
-                'backupCount': 10,
-                'encoding': 'UTF-8',
-                'formatter': 'verbose',
-            },
-            'files-app': {
-                'level': 'DEBUG',
-                'class': 'logging.handlers.RotatingFileHandler',
-                'filename': os.path.join(LOG_DIR, 'app.log'),
-                'maxBytes': 1073844224,
-                'backupCount': 10,
-                'encoding': 'UTF-8',
-                'formatter': 'verbose',
-            },
-            'files-api': {
-                'level': 'DEBUG',
-                'class': 'logging.handlers.RotatingFileHandler',
-                'filename': os.path.join(LOG_DIR, 'api.log'),
-                'maxBytes': 1073844224,
-                'backupCount': 10,
-                'encoding': 'UTF-8',
-                'formatter': 'verbose',
-            },
-        },
-        'loggers': {
-            '': {
-                'handlers': ['files-app'],
-                'level': 'DEBUG' if DEBUG else 'INFO',
-                'propagate': True,
-            },
-            'API': {
-                'handlers': ['files-api'],
-                'level': 'INFO',
-                'propagate': True,
-            },
-            'django': {
-                'handlers': ['files-django'],
-                'level': 'DEBUG' if DEBUG else 'INFO',
-                'propagate': False,
-            },
-        },
-    }
+    def __init__(self, django_settings, msa_config=MSA_CONFIG_DEFAULT):
+        self._msa_config = msa_config
+        self._django_settings = django_settings
+        self._settings = django_settings.copy()
+        self._update_settings()
 
-    # Update settings for static files
-    settings['STATIC_URL'] = STATIC_URL
-    STATIC_ROOT = os.path.join(DATA_DIR, STATIC_ROOT_REL)
-    settings['STATIC_ROOT'] = STATIC_ROOT
-    os.makedirs(STATIC_ROOT, exist_ok=True)
+    @property
+    def msa_config(self):
+        return self._msa_config
 
-    # Update settings for databases
-    if USE_MSA_DEFAULT_DATABASES:
-        settings['DATABASES'] = {
+    @property
+    def settings(self):
+        return self._settings
+
+    def update_django_settings(self, django_settings=None):
+        if not django_settings:
+            django_settings = self._django_settings
+        django_settings.update(self.settings)
+
+    def _update_settings(self):
+        self._update_msa_data_dir()
+        self._update_debug()
+        self._update_static()
+        self._update_https()
+        self._update_db()
+        self._update_logging()
+        self._update_rest_framework()
+        self._update_allow_admin_site()
+
+    def _update_msa_data_dir(self):
+        msa_data_dir = self.msa_config.get('MSA_DATA_DIR', None)
+        if msa_data_dir:
+            self.settings['MSA_DATA_DIR'] = msa_data_dir
+        else:
+            self.settings['MSA_DATA_DIR'] = self.settings.get('BASE_DIR')
+
+    def _update_debug(self):
+        self.settings['DEBUG'] = self.msa_config.get('DEBUG', False)
+
+    def _update_static(self):
+        self.settings['STATIC_URL'] = self.msa_config.get('STATIC_URL')
+
+        msa_data_dir = self.settings['MSA_DATA_DIR']
+        msa_static_root_rel = self.msa_config.get('MSA_STATIC_ROOT')
+        static_root = os.path.join(msa_data_dir, msa_static_root_rel)
+        self.settings['STATIC_ROOT'] = static_root
+        os.makedirs(static_root, exist_ok=True)
+
+    def _update_https(self):
+        msa_https = self.msa_config.get('MSA_HTTPS', False)
+        if msa_https:
+            self.settings['SECURE_PROXY_SSL_HEADER'] = (
+                'HTTP_X_FORWARDED_PROTO', 'https'
+            )
+            self.settings['SESSION_COOKIE_SECURE'] = True
+            self.settings['CSRF_COOKIE_SECURE'] = True
+
+    def _update_db(self):
+        msa_default_db = self.msa_config.get('MSA_DEFAULT_DB', False)
+        if not msa_default_db:
+            return
+
+        db_dir = os.path.join(self.settings['MSA_DATA_DIR'], 'db')
+        os.makedirs(db_dir, exist_ok=True)
+        self.settings['DATABASES'].update({
             'default': {
                 'ENGINE': 'django.db.backends.sqlite3',
-                'NAME': os.path.join(DB_DIR, 'db.sqlite3'),
+                'NAME': os.path.join(db_dir, 'db.sqlite3'),
             }
+        })
+
+    def _update_logging(self):
+        msa_logging = self.msa_config.get('MSA_LOGGING', True)
+        if not msa_logging:
+            return
+
+        debug = self.settings['DEBUG']
+        log_dir = os.path.join(self.settings['MSA_DATA_DIR'], 'log')
+        os.makedirs(log_dir, exist_ok=True)
+        self.settings['LOGGING'] = {
+            'version': 1,
+            'disable_existing_loggers': False,
+            'formatters': {
+                'verbose': {
+                    'format': '%(asctime)s.%(msecs)03d|%(levelname)s|'
+                              '%(name)s|%(message)s',
+                    'datefmt': '%Y-%m-%d %H:%M:%S',
+                },
+            },
+            'handlers': {
+                'files-django': {
+                    'level': 'DEBUG',
+                    'class': 'logging.handlers.RotatingFileHandler',
+                    'filename': os.path.join(log_dir, 'django.log'),
+                    'maxBytes': 1073844224,
+                    'backupCount': 10,
+                    'encoding': 'UTF-8',
+                    'formatter': 'verbose',
+                },
+                'files-app': {
+                    'level': 'DEBUG',
+                    'class': 'logging.handlers.RotatingFileHandler',
+                    'filename': os.path.join(log_dir, 'app.log'),
+                    'maxBytes': 1073844224,
+                    'backupCount': 10,
+                    'encoding': 'UTF-8',
+                    'formatter': 'verbose',
+                },
+                'files-api': {
+                    'level': 'DEBUG',
+                    'class': 'logging.handlers.RotatingFileHandler',
+                    'filename': os.path.join(log_dir, 'api.log'),
+                    'maxBytes': 1073844224,
+                    'backupCount': 10,
+                    'encoding': 'UTF-8',
+                    'formatter': 'verbose',
+                },
+            },
+            'loggers': {
+                '': {
+                    'handlers': ['files-app'],
+                    'level': 'DEBUG' if debug else 'INFO',
+                    'propagate': True,
+                },
+                'API': {
+                    'handlers': ['files-api'],
+                    'level': 'INFO',
+                    'propagate': True,
+                },
+                'django': {
+                    'handlers': ['files-django'],
+                    'level': 'DEBUG' if debug else 'INFO',
+                    'propagate': False,
+                },
+            },
         }
 
-    return settings
+    def _update_rest_framework(self):
+        self.settings['REST_FRAMEWORK'] = {
+            'DEFAULT_PERMISSION_CLASSES': ('msa.permissions.DenyAny',),
+            'DEFAULT_AUTHENTICATION_CLASSES': (),
+        }
+
+    def _update_allow_admin_site(self):
+        self.settings['MSA_ALLOW_ADMIN_SITE'] = \
+            self.msa_config.get('MSA_ALLOW_ADMIN_SITE', False)
 
 
-def get_msa_settings_from_env(BASE_DIR):
-    MSA_DEPLOY_ENVIRONMENT = os.environ.get('MSA_DEPLOY_ENVIRONMENT',
-                                            'development')
-    MSA_DEBUG = os.environ.get('MSA_DEBUG', True)
-    if MSA_DEPLOY_ENVIRONMENT.lower() == 'production':
-        return get_msa_settings(
-            BASE_DIR, DATA_DIR='/data', DEBUG=MSA_DEBUG, SECURE_COOKIE=True,
-            STATIC_ROOT_REL='deploy/web/django-static/'
-        )
-    elif MSA_DEPLOY_ENVIRONMENT.lower() == 'development':
-        return get_msa_settings(BASE_DIR, DATA_DIR=BASE_DIR, DEBUG=MSA_DEBUG)
-    else:
-        raise ValueError('MSA_DEPLOY_ENVIRONMENT must be either ' +
-                         '\'production\' or \'development\'.')
+def update_django_settings(django_settings, msa_config=MSA_CONFIG_DEFAULT):
+    MSASettings(django_settings, msa_config).update_django_settings()

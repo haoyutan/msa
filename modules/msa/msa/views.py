@@ -54,11 +54,9 @@ class LoggedAPIView(APIView):
         self.logger.info(msg)
 
 
-class MessageView(LoggedAPIView):
+class StaticView(LoggedAPIView):
     permission_classes = (AllowAny,)
-    message = 'NA'
+    content = {'message': 'Hello, MSA.'}
 
     def get(self, request, format=None):
-        return Response({'message': self.message})
-
-welcome_message_view = MessageView.as_view(message = 'Welcome!')
+        return Response(self.content)
