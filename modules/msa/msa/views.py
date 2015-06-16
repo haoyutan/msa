@@ -6,7 +6,7 @@ from rest_framework.permissions import AllowAny
 
 
 class LoggedAPIView(APIView):
-    logger = logging.getLogger('API')
+    api_logger = logging.getLogger('API')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -32,7 +32,7 @@ class LoggedAPIView(APIView):
         }
         info_str = json.dumps(info, sort_keys = True)
         msg = '{}|{}|{}'.format(self._log_id, 'REQUEST', info_str)
-        self.logger.info(msg)
+        self.api_logger.info(msg)
 
     def _log_authentication(self, request):
         info = {
@@ -42,7 +42,7 @@ class LoggedAPIView(APIView):
         }
         info_str = json.dumps(info, sort_keys = True)
         msg = '{}|{}|{}'.format(self._log_id, 'AUTH', info_str)
-        self.logger.info(msg)
+        self.api_logger.info(msg)
 
     def _log_response(self, response):
         info = {
@@ -51,7 +51,7 @@ class LoggedAPIView(APIView):
         }
         info_str = json.dumps(info, sort_keys = True)
         msg = '{}|{}|{}'.format(self._log_id, 'RESPONSE', info_str)
-        self.logger.info(msg)
+        self.api_logger.info(msg)
 
 
 class StaticView(LoggedAPIView):

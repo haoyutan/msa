@@ -151,12 +151,12 @@ class MSASettings:
                 '': {
                     'handlers': ['files-app'],
                     'level': 'DEBUG' if debug else 'INFO',
-                    'propagate': True,
+                    'propagate': False,
                 },
                 'API': {
                     'handlers': ['files-api'],
                     'level': 'INFO',
-                    'propagate': True,
+                    'propagate': False,
                 },
                 'django': {
                     'handlers': ['files-django'],
