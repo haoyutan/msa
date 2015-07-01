@@ -9,10 +9,9 @@ from . import views
 urlpatterns = (
     url(r'^$', views.micro_service_list),
     url(r'^micro-services/$', views.micro_service_list),
-    url(r'^micro-service/$', views.micro_service_details),
-    url(r'^micro-service/(?P<name>[-\w]+)/$', views.micro_service_details),
-    url(r'^configuration/$', views.micro_service_configuration_list),
-    url(r'^configuration/(?P<ms_name>[-\w]+)/$',
+    url(r'^micro-services/(?P<name>[-\w]+)/$', views.micro_service_details),
+    url(r'^configurations/$', views.micro_service_configuration_list),
+    url(r'^configurations/(?P<ms_name>[-\w]+)/$',
         views.micro_service_configuration_list),
 )
 

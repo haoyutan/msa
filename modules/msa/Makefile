@@ -6,7 +6,7 @@ dist: clean
 uninstall:
 	yes | pip uninstall MSA-Framework
 
-install:
+install: dist
 	pip install dist/*.tar.gz
 
 clean:
