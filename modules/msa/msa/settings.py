@@ -66,7 +66,18 @@ class MSASettings:
             self.settings['MSA_DATA_DIR'] = self.settings.get('BASE_DIR')
 
     def _update_debug(self):
-        self.settings['DEBUG'] = self.msa_config.get('DEBUG', False)
+        debug = self.msa_config.get('DEBUG', False)
+        self.settings['DEBUG'] = debug
+
+        '''
+        If DEBUG is False, ALLOWED_HOSTS must be set properly. Otherwise,
+        Nginx will return BAD REQUEST (400) error. For convenience, we
+        automatically set ALLOWED_HOSTS to ["*",] if it is empty and
+        DEBUG is False. However, we will not change ALLOWED_HOSTS if it is
+        not empty (which implies that it is already set).
+        '''
+        if not debug and len(self.settings['ALLOWED_HOSTS']) == 0:
+            self.settings['ALLOWED_HOSTS'] = ['*',]
 
     def _update_static(self):
         self.settings['STATIC_URL'] = self.msa_config.get('STATIC_URL')
@@ -177,5 +188,14 @@ class MSASettings:
             self.msa_config.get('MSA_ALLOW_ADMIN_SITE', False)
 
 
-def update_django_settings(django_settings, msa_config=MSA_CONFIG_DEFAULT):
+def update_django_settings(django_settings, user_msa_config={}):
+    env = os.environ.get('MSA_DEPLOYMENT_ENV', 'development')
+    if env == 'docker':
+        msa_config = MSA_CONFIG_DOCKER_DEFAULT.copy()
+    else:
+        msa_config = MSA_CONFIG_DEVELOPMENT_DEFAULT.copy()
+
+    if user_msa_config:
+        msa_config = msa_config.update(user_msa_config)
+
     MSASettings(django_settings, msa_config).update_django_settings()
