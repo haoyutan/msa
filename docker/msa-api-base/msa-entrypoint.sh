@@ -62,8 +62,13 @@ install_python_packages () {
 		$PIP install -r $MSA_DIST/packages/packages.list
 	fi
 
-	for PACKAGE in `ls $MSA_DIST/packages/*.whl $MSA_DIST/packages/*.tar.gz`; do
-		echo "Installing additional packages: $PACKAGE..."
+	for PACKAGE in `ls $MSA_DIST/packages/*.whl`; do
+		echo "Installing additional packages (*.whl): $PACKAGE..."
+		$PIP install $PACKAGE
+	done
+
+	for PACKAGE in `ls $MSA_DIST/packages/*.tar.gz`; do
+		echo "Installing additional packages (*.tar.gz): $PACKAGE..."
 		$PIP install $PACKAGE
 	done
 }
