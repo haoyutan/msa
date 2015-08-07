@@ -4,6 +4,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 
+from .utils import get_ip
+
 
 class LoggedAPIView(APIView):
     api_logger = logging.getLogger('API')
@@ -11,6 +13,10 @@ class LoggedAPIView(APIView):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._log_id = str(uuid1())
+
+    def initialize_request(self, request, *args, **kwargs):
+        self._log_raw_request(request)
+        return super().initialize_request(request, *args, **kwargs)
 
     def initial(self, request, *args, **kwargs):
         self._log_request(request)
@@ -22,13 +28,18 @@ class LoggedAPIView(APIView):
         self._log_response(response)
         return response
 
+    def _log_raw_request(self, request):
+        msg = '{}|{}|{}'.format(self._log_id, 'RAW_REQUEST',
+                                self._extract_raw_request_info(request))
+        self.api_logger.info(msg)
+
     def _log_request(self, request):
         info = {
             'method'        : request.method.upper(),
             'uri'           : request.build_absolute_uri(),
-            'remote_host'   : request.META.get('REMOTE_HOST'),
+            'content_type'  : request.content_type,
             'authorization' : request.META.get('HTTP_AUTHORIZATION'),
-            'POST'          : str(request.POST.dict()),
+            'data'          : str(request.data),
         }
         info_str = json.dumps(info, sort_keys = True)
         msg = '{}|{}|{}'.format(self._log_id, 'REQUEST', info_str)
@@ -52,6 +63,15 @@ class LoggedAPIView(APIView):
         info_str = json.dumps(info, sort_keys = True)
         msg = '{}|{}|{}'.format(self._log_id, 'RESPONSE', info_str)
         self.api_logger.info(msg)
+
+    def _extract_raw_request_info(self, request):
+        info = {
+            'method'       : request.method,
+            'uri'          : request.build_absolute_uri(),
+            'content_type' : request.META.get('CONTENT_TYPE', ''),
+            'remote_addr'  : get_ip(request),
+        }
+        return info
 
 
 class StaticView(LoggedAPIView):

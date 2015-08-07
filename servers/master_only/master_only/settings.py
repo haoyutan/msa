@@ -107,7 +107,7 @@ STATIC_URL = '/static/'
 
 
 # MSA-Framework settings 
-from msa.settings import update_django_settings, MSA_CONFIG_DEVELOPMENT_DEFAULT
-update_django_settings(locals(), MSA_CONFIG_DEVELOPMENT_DEFAULT)
+from msa.settings import update_django_settings
+update_django_settings(locals())
 
 MSA_MASTER_NAME = os.environ.get('MSA_MASTER_NAME')
