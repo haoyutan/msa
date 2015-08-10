@@ -205,10 +205,10 @@ def update_django_settings(django_settings, user_msa_config={}):
         msa_config = MSA_CONFIG_DOCKER_DEFAULT.copy()
     else:
         raise ValueError('The value of environment variable '
-                         'MSA_DEVELOYMENT_ENV should be \'development\', '
+                         'MSA_DEPLOYMENT_ENV should be \'development\', '
                          '\'production\', or \'docker\'.')
 
     if user_msa_config:
-        msa_config = msa_config.update(user_msa_config)
+        msa_config.update(user_msa_config)
 
     MSASettings(django_settings, msa_config).update_django_settings()
