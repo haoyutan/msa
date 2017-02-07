@@ -1,6 +1,7 @@
 import os
 
 
+
 MSA_CONFIG_DEFAULT = {
     'DEBUG'               : True,
     'MSA_DATA_DIR'        : None,
@@ -12,26 +13,19 @@ MSA_CONFIG_DEFAULT = {
     'MSA_ALLOW_ADMIN_SITE': False,
 }
 
+
 MSA_CONFIG_DEVELOPMENT_DEFAULT = MSA_CONFIG_DEFAULT.copy()
 MSA_CONFIG_DEVELOPMENT_DEFAULT.update({
     'MSA_ALLOW_ADMIN_SITE': True,
 })
 
+
 MSA_CONFIG_PRODUCTION_DEFAULT = MSA_CONFIG_DEFAULT.copy()
 MSA_CONFIG_PRODUCTION_DEFAULT.update({
     'DEBUG'               : False,
     'MSA_HTTPS'           : True,
-    'MSA_ALLOW_ADMIN_SITE': True,
 })
 
-MSA_CONFIG_DOCKER_DEFAULT = MSA_CONFIG_DEFAULT.copy()
-MSA_CONFIG_DOCKER_DEFAULT.update({
-    'DEBUG'               : False,
-    'MSA_HTTPS'           : True,
-    'MSA_ALLOW_ADMIN_SITE': True,
-    'MSA_DATA_DIR'        : '/data',
-    'MSA_STATIC_ROOT'     : 'deploy/web/django-static/',
-})
 
 
 class MSASettings:
@@ -201,12 +195,10 @@ def update_django_settings(django_settings, user_msa_config={}):
         msa_config = MSA_CONFIG_DEVELOPMENT_DEFAULT.copy()
     elif env == 'production':
         msa_config = MSA_CONFIG_PRODUCTION_DEFAULT.copy()
-    elif env == 'docker':
-        msa_config = MSA_CONFIG_DOCKER_DEFAULT.copy()
     else:
         raise ValueError('The value of environment variable '
-                         'MSA_DEPLOYMENT_ENV should be \'development\', '
-                         '\'production\', or \'docker\'.')
+                         'MSA_DEPLOYMENT_ENV should be either \'development\', '
+                         'or \'docker\'.')
 
     if user_msa_config:
         msa_config.update(user_msa_config)

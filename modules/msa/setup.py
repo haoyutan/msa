@@ -3,10 +3,10 @@ from setuptools import setup, find_packages
 
 setup(
     name='MSA-Framework',
-    version='0.1',
+    version='0.2',
     packages=find_packages(),
     author='Haoyu Tan',
-    author_email='haoyutan@gmail.com',
+    author_email='hytan@deepera.com',
     license='MIT',
     description='Micro Service Architecture Framework',
     url='http://www.deepera.com/',

@@ -39,8 +39,6 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
 
     'rest_framework',
-
-    'msa.contrib.dummy',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -109,5 +107,7 @@ STATIC_URL = '/static/'
 # MSA-Framework settings 
 from msa.settings import update_django_settings
 update_django_settings(locals())
+
+INSTALLED_APPS = INSTALLED_APPS + ('msa.contrib.dummy',)
 
 MSA_DUMMY_NAME = os.environ.get('MSA_DUMMY_NAME')
