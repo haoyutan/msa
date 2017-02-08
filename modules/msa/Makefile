@@ -1,4 +1,4 @@
-all: dist install
+all: dist uninstall install
 
 dist: clean
 	python setup.py sdist
