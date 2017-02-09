@@ -30,24 +30,29 @@ MSA_CONFIG_PRODUCTION_DEFAULT.update({
 
 class MSASettings:
 
+
     def __init__(self, django_settings, msa_config=MSA_CONFIG_DEFAULT):
         self._msa_config = msa_config
         self._django_settings = django_settings
         self._settings = django_settings.copy()
         self._update_settings()
 
+
     @property
     def msa_config(self):
         return self._msa_config
+
 
     @property
     def settings(self):
         return self._settings
 
+
     def update_django_settings(self, django_settings=None):
         if not django_settings:
             django_settings = self._django_settings
         django_settings.update(self.settings)
+
 
     def _update_settings(self):
         self._update_msa_data_dir()
@@ -59,12 +64,14 @@ class MSASettings:
         self._update_rest_framework()
         self._update_allow_admin_site()
 
+
     def _update_msa_data_dir(self):
         msa_data_dir = self.msa_config.get('MSA_DATA_DIR', None)
         if msa_data_dir:
             self.settings['MSA_DATA_DIR'] = msa_data_dir
         else:
             self.settings['MSA_DATA_DIR'] = self.settings.get('BASE_DIR')
+
 
     def _update_debug(self):
         debug = self.msa_config.get('DEBUG', False)
@@ -77,6 +84,7 @@ class MSASettings:
         if debug and len(self.settings['ALLOWED_HOSTS']) == 0:
             self.settings['ALLOWED_HOSTS'] = ['*',]
 
+
     def _update_static(self):
         self.settings['STATIC_URL'] = self.msa_config.get('STATIC_URL')
 
@@ -84,7 +92,7 @@ class MSASettings:
         msa_static_root_rel = self.msa_config.get('MSA_STATIC_ROOT')
         static_root = os.path.join(msa_data_dir, msa_static_root_rel)
         self.settings['STATIC_ROOT'] = static_root
-        os.makedirs(static_root, exist_ok=True)
+
 
     def _update_https(self):
         msa_https = self.msa_config.get('MSA_HTTPS', False)
@@ -94,6 +102,7 @@ class MSASettings:
             )
             self.settings['SESSION_COOKIE_SECURE'] = True
             self.settings['CSRF_COOKIE_SECURE'] = True
+
 
     def _update_db(self):
         msa_default_db = self.msa_config.get('MSA_DEFAULT_DB', False)
@@ -108,6 +117,7 @@ class MSASettings:
                 'NAME': os.path.join(db_dir, 'db.sqlite3'),
             }
         })
+
 
     def _update_logging(self):
         msa_logging = self.msa_config.get('MSA_LOGGING', True)
@@ -175,11 +185,13 @@ class MSASettings:
             },
         }
 
+
     def _update_rest_framework(self):
         self.settings['REST_FRAMEWORK'] = {
             'DEFAULT_PERMISSION_CLASSES': ('msa.permissions.DenyAny',),
             'DEFAULT_AUTHENTICATION_CLASSES': (),
         }
+
 
     def _update_allow_admin_site(self):
         self.settings['MSA_ALLOW_ADMIN_SITE'] = \
