@@ -39,9 +39,9 @@ class SToken(models.Model):
     """
     key = models.CharField(_("Key"), max_length=40, primary_key=True)
     suser = models.ForeignKey(
-        SUser, related_name='auth_stoken',
-        on_delete=models.CASCADE, verbose_name=_("SUser")
-    )
+                SUser, related_name='auth_stoken',
+                on_delete=models.CASCADE, verbose_name=_("SUser")
+            )
     host = models.CharField(_("Host"), max_length=128, null=False,
                             blank=True, default='*')
     created = models.DateTimeField(_("Created"), auto_now_add=True)
