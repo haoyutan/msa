@@ -4,7 +4,7 @@ dist: clean
 	python setup.py sdist
 
 uninstall:
-	yes | pip uninstall MSA-Framework
+	-pip uninstall -y MSA-Framework
 
 install: dist
 	pip install dist/*.tar.gz
