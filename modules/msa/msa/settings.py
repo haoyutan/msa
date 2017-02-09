@@ -71,13 +71,10 @@ class MSASettings:
         self.settings['DEBUG'] = debug
 
         '''
-        If DEBUG is False, ALLOWED_HOSTS must be set properly. Otherwise,
-        Nginx will return BAD REQUEST (400) error. For convenience, we
-        automatically set ALLOWED_HOSTS to ["*",] if it is empty and
-        DEBUG is False. However, we will not change ALLOWED_HOSTS if it is
-        not empty (which implies that it is already set).
+        In debug mode, we automatically set ALLOWED_HOSTS to ['*',] if
+        it is empty.
         '''
-        if not debug and len(self.settings['ALLOWED_HOSTS']) == 0:
+        if debug and len(self.settings['ALLOWED_HOSTS']) == 0:
             self.settings['ALLOWED_HOSTS'] = ['*',]
 
     def _update_static(self):
