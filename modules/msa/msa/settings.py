@@ -190,6 +190,7 @@ class MSASettings:
         self.settings['REST_FRAMEWORK'] = {
             'DEFAULT_PERMISSION_CLASSES': ('msa.permissions.DenyAny',),
             'DEFAULT_AUTHENTICATION_CLASSES': (),
+            'EXCEPTION_HANDLER': 'msa.views.exception_handler',
         }
 
 

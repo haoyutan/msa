@@ -3,6 +3,7 @@ from uuid import uuid1
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
+from rest_framework.views import exception_handler as default_exception_handler
 
 from .utils import get_ip, JSONEncoder
 
@@ -95,3 +96,11 @@ class StaticView(LoggedAPIView):
 
     def get(self, request, format=None):
         return Response(self.content)
+
+
+
+def exception_handler(e, context):
+    response = default_exception_handler(e, context)
+    if response is not None:
+        response.data['status_code'] = response.status_code
+    return response
